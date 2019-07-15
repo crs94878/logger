@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 /**
+ * Класс, АОП для вывода логов дейсвтвий c классами, которые помеченны аннотацией {@link Logging}
  * Date: 13.07.2019
  * @author shell
  */
@@ -19,25 +20,44 @@ import java.util.stream.Collectors;
 @Component
 public class LoggerWorker {
 
+    /** Логгер */
     @Autowired
     private Log log;
 
+    /** Конструктор по умолчанию */
     public LoggerWorker() {
     }
 
+    /**  */
     @Pointcut("execution(* (@Logging *).*(..))")
     public void annotClass() {
     }
 
+    /** */
     @Pointcut("@annotation(Logging)")
     public void annotMethod() {
     }
 
+    /**
+     *
+     * @param joinPoint
+     * @return
+     */
     @Before(value = "annotClass() || annotMethod()")
     public Object loggingBeforeCalling(JoinPoint joinPoint) {
         Object object = joinPoint.getTarget();
-        LoggingLvl loggingLvl = joinPoint.getTarget().getClass().getAnnotation(Logging.class).level();
+        LoggingLvl loggingLvl = object.getClass().getAnnotation(Logging.class).level();
         printLog(loggingLvl, "Объект класса: ", object.getClass().getName());
+        methWithParamLog(joinPoint, loggingLvl);
+        return object;
+    }
+
+    /**
+     *
+     * @param joinPoint
+     * @param loggingLvl
+     */
+    private void methWithParamLog(JoinPoint joinPoint, LoggingLvl loggingLvl) {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         String methName = methodSignature.getMethod().getReturnType() + " " + methodSignature.getMethod().getName();
         printLog(loggingLvl, "Вызван метод: ", methName);
@@ -45,14 +65,60 @@ public class LoggerWorker {
         Parameter[] parameters = methodSignature.getMethod().getParameters();
         printLog(loggingLvl, "С параметрами: ", objectsToStr(parameters));
         printLog(loggingLvl, "Аргументами: ", objectsToStr(arg));
-        return object;
     }
 
-    private String objectsToStr(Object[] args) {
-        return Arrays.stream(args)
+    /**
+     *
+     * @param joinPoint
+     */
+    @After(value = "annotClass() || annotMethod()")
+    public void loggingAfterProeced(JoinPoint joinPoint) {
+        LoggingLvl loggingLvl = joinPoint.getTarget().getClass().getAnnotation(Logging.class).level();
+        printLog(loggingLvl, "Метод был выполнен", null);
+    }
+
+    /**
+     *
+     * @param joinPoint
+     * @param result
+     */
+    @AfterReturning(value = "annotClass() || annotMethod()", returning = "result")
+    public void loggingAfterProccedAndReturnValue(JoinPoint joinPoint, Object result) {
+        LoggingLvl loggingLvl = joinPoint.getTarget().getClass().getAnnotation(Logging.class).level();
+        if(result != null) {
+            printLog(loggingLvl, "Из метода был возвращено значение: ", result.toString());
+            printLog(loggingLvl, "Тип данных возвращенного значения: ", result.getClass().getName());
+        }
+    }
+
+    /**
+     *
+     * @param joinPoint
+     * @param error
+     */
+    @AfterThrowing(value = "annotClass() || annotMethod()", throwing = "error")
+    public void loggingAfterThrowing(JoinPoint joinPoint, Throwable error) {
+        LoggingLvl loggingLvl = joinPoint.getTarget().getClass().getAnnotation(Logging.class).level();
+        printLog(loggingLvl, "Исключительная ситуация, сообщение: ", error.getMessage());
+        printLog(LoggingLvl.TRACE,"Стек вызовов: ", error);
+    }
+
+    /**
+     * Конвертирование массива объектов в строку
+     * @param objects объекты
+     * @return строка
+     */
+    private String objectsToStr(Object[] objects) {
+        return Arrays.stream(objects)
                 .map(Object::toString).collect(Collectors.joining("; "));
     }
 
+    /**
+     * Вывод логов программы
+     * @param lvl Уровень логгирования
+     * @param msg сообщение
+     * @param parametr параметры сообщения
+     */
     private void printLog(LoggingLvl lvl, String msg, Object parametr) {
         if(parametr != null) {
             switch (lvl) {
@@ -69,27 +135,5 @@ public class LoggerWorker {
                     log.error(msg, (Throwable) parametr);
             }
         }
-    }
-
-    @After(value = "annotClass() || annotMethod()")
-    public void loggingAfterProeced(JoinPoint joinPoint) {
-        LoggingLvl loggingLvl = joinPoint.getTarget().getClass().getAnnotation(Logging.class).level();
-        printLog(loggingLvl, "Метод был выполнен", null);
-    }
-
-    @AfterReturning(value = "annotClass() || annotMethod()", returning = "result")
-    public void loggingAfterProccedAndReturnValue(JoinPoint joinPoint, Object result) {
-        LoggingLvl loggingLvl = joinPoint.getTarget().getClass().getAnnotation(Logging.class).level();
-        if(result != null) {
-            printLog(loggingLvl, "Из метода был возвращено значение: ", result.toString());
-            printLog(loggingLvl, "Тип данных возвращенного значения: ", result.getClass().getName());
-        }
-    }
-
-    @AfterThrowing(value = "annotClass() || annotMethod()", throwing = "error")
-    public void loggingAfterThrowing(JoinPoint joinPoint, Throwable error) {
-        LoggingLvl loggingLvl = joinPoint.getTarget().getClass().getAnnotation(Logging.class).level();
-        printLog(loggingLvl, "Исключительная ситуация, сообщение: ", error.getMessage());
-        printLog(LoggingLvl.TRACE,"Стек вызовов: ", error);
     }
 }

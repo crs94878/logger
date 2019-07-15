@@ -1,22 +1,17 @@
 package com.logging;
 
 /**
+ * Перечисление уровней логгирования, в зависимости от уровня логгирования будут оотвествующий уровни выволда логгов
  * Date: 15.07.2019
  * @author shell
  */
 public enum LoggingLvl {
 
-    INFO(0),
+    INFO,
 
-    WARN(1),
+    WARN,
 
-    DEBUG(2),
+    DEBUG,
 
-    TRACE(3);
-
-    private LoggingLvl(int lvl) {
-        this.lvl = lvl;
-    }
-
-    private final int lvl;
+    TRACE;
 }
