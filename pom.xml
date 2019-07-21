@@ -8,8 +8,13 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.1.4.RELEASE</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
+
+    <properties>
+        <aspectVersion>5.1.4.RELEASE</aspectVersion>
+        <springContextVersion>5.1.4.RELEASE</springContextVersion>
+    </properties>
 
     <groupId>com.logging</groupId>
     <artifactId>logging_lib</artifactId>
@@ -19,13 +24,13 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aspects</artifactId>
+            <version>${aspectVersion}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring</artifactId>
-            <version>2.5.6</version>
+            <artifactId>spring-context</artifactId>
+            <version>${springContextVersion}</version>
         </dependency>
-
     </dependencies>
 
 </project>
