@@ -6,6 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Аннотация, которым необходимо пометить класс, что бы включить логгирование
  * Интерфайс, которым необходимо пометить класс, что бы включить логгирование
  * Date: 13.07.2019
  * @author shell

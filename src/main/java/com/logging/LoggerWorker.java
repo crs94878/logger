@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 /**
- * Класс, АОП для вывода логов дейсвтвий c классами, которые помеченны аннотацией {@link Logging}
+ * Класс, АОП для вывода логов действий c классами, которые помеченны аннотацией {@link Logging}
  * Date: 13.07.2019
  * @author shell
  */
@@ -28,36 +28,36 @@ public class LoggerWorker {
     public LoggerWorker() {
     }
 
-    /**  */
+    /** Срез обозначающий помеченные аннотацией классы */
     @Pointcut("execution(* (@Logging *).*(..))")
     public void annotClass() {
     }
 
-    /** */
+    /** Срез обозначающий, помеченные аннотацией методы */
     @Pointcut("@annotation(Logging)")
     public void annotMethod() {
     }
 
     /**
-     *
-     * @param joinPoint
-     * @return
+     * Метод запускается перед выполеннием точки выполнения
+     * @param joinPoint точка выполения
+     * @return объект на котором проихожит вызов метода выполенния
      */
     @Before(value = "annotClass() || annotMethod()")
     public Object loggingBeforeCalling(JoinPoint joinPoint) {
         Object object = joinPoint.getTarget();
         LoggingLvl loggingLvl = object.getClass().getAnnotation(Logging.class).level();
         printLog(loggingLvl, "Объект класса: ", object.getClass().getName());
-        methWithParamLog(joinPoint, loggingLvl);
+        printMethWithParam(joinPoint, loggingLvl);
         return object;
     }
 
     /**
-     *
-     * @param joinPoint
-     * @param loggingLvl
+     * Метод логгирует информаицию о методе в точке выпонения и об аргументах метода
+     * @param joinPoint точка выполения
+     * @param loggingLvl уровень логгирования
      */
-    private void methWithParamLog(JoinPoint joinPoint, LoggingLvl loggingLvl) {
+    private void printMethWithParam(JoinPoint joinPoint, LoggingLvl loggingLvl) {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         String methName = methodSignature.getMethod().getReturnType() + " " + methodSignature.getMethod().getName();
         printLog(loggingLvl, "Вызван метод: ", methName);
@@ -68,8 +68,8 @@ public class LoggerWorker {
     }
 
     /**
-     *
-     * @param joinPoint
+     * Метод запускается после выполения точки выполенния
+     * @param joinPoint точка выполения
      */
     @After(value = "annotClass() || annotMethod()")
     public void loggingAfterProeced(JoinPoint joinPoint) {
@@ -78,9 +78,9 @@ public class LoggerWorker {
     }
 
     /**
-     *
-     * @param joinPoint
-     * @param result
+     * Метод запускается после выполнения и возврата значения из точки выполнения
+     * @param joinPoint точка выполнения
+     * @param result возвращенное занчение
      */
     @AfterReturning(value = "annotClass() || annotMethod()", returning = "result")
     public void loggingAfterProccedAndReturnValue(JoinPoint joinPoint, Object result) {
@@ -92,15 +92,15 @@ public class LoggerWorker {
     }
 
     /**
-     *
-     * @param joinPoint
-     * @param error
+     * Метод логгирования запускается если во время выполнения было выброшено исключение
+     * @param joinPoint Точка выполнения
+     * @param error исключение
      */
     @AfterThrowing(value = "annotClass() || annotMethod()", throwing = "error")
     public void loggingAfterThrowing(JoinPoint joinPoint, Throwable error) {
         LoggingLvl loggingLvl = joinPoint.getTarget().getClass().getAnnotation(Logging.class).level();
         printLog(loggingLvl, "Исключительная ситуация, сообщение: ", error.getMessage());
-        printLog(LoggingLvl.TRACE,"Стек вызовов: ", error);
+        printLog(LoggingLvl.ERROR,"Стек вызовов: ", error);
     }
 
     /**
@@ -121,19 +121,16 @@ public class LoggerWorker {
      */
     private void printLog(LoggingLvl lvl, String msg, Object parametr) {
         if(parametr != null) {
-            switch (lvl) {
-                case INFO:
-                    log.info(msg + parametr.toString());
-                    break;
-                case WARN:
-                    log.warn(msg + parametr.toString());
-                    break;
-                case DEBUG:
-                    log.debug(msg + parametr.toString());
-                    break;
-                case TRACE:
-                    log.error(msg, (Throwable) parametr);
+            if  (log.isTraceEnabled() || lvl.equals(LoggingLvl.ERROR)) {
+                log.error(msg, (Throwable) parametr);
+            } else if (log.isDebugEnabled() || lvl.equals(LoggingLvl.DEBUG)) {
+                log.debug(msg + parametr.toString());
+            } else if (log.isWarnEnabled() || lvl.equals(LoggingLvl.WARN)) {
+                log.warn(msg + parametr.toString());
+            } else if (log.isInfoEnabled() || lvl.equals(LoggingLvl.INFO)) {
+                log.info(msg + parametr.toString());
             }
         }
     }
 }
+
