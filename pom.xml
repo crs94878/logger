@@ -12,8 +12,8 @@
     </parent>
 
     <properties>
-        <aspectVersion>5.1.4.RELEASE</aspectVersion>
-        <springContextVersion>5.1.4.RELEASE</springContextVersion>
+        <aspect.version>5.1.4.RELEASE</aspect.version>
+        <springContext.version>5.1.4.RELEASE</springContext.version>
     </properties>
 
     <groupId>com.logging</groupId>
@@ -24,12 +24,12 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aspects</artifactId>
-            <version>${aspectVersion}</version>
+            <version>${aspect.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>${springContextVersion}</version>
+            <version>${springContext.version}</version>
         </dependency>
     </dependencies>
 
