@@ -13,7 +13,7 @@
 
     <properties>
         <aspect.version>5.1.4.RELEASE</aspect.version>
-        <springContext.version>5.1.4.RELEASE</springContext.version>
+        <springContext.version>5.2.22.RELEASE</springContext.version>
     </properties>
 
     <groupId>com.logging</groupId>
